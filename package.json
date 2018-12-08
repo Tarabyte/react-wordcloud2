@@ -12,6 +12,9 @@
     "react": "^16.6.x",
     "wordcloud": "^1.1.0"
   },
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@babel/plugin-proposal-class-properties": "^7.2.1",

@@ -1,0 +1,43 @@
+{
+  "name": "react-wordcloud2",
+  "version": "0.0.0",
+  "description": "React wrapper for wordcloud2.js",
+  "main": "lib/react-wordcloud2.cjs.js",
+  "module": "lib/react-wordcloud2.es.js",
+  "repository": "https://github.com/Tarabyte/react-wordcloud2.git",
+  "author": "Yury Tarabanko <tarabanko.yury@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "prop-types": "^15.6.x",
+    "react": "^16.6.x",
+    "wordcloud": "^1.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.1",
+    "@babel/preset-env": "^7.2.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.9.0",
+    "eslint-config-prettier": "^3.3.0",
+    "eslint-config-react-app": "^3.0.5",
+    "eslint-plugin-flowtype": "^3.2.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "husky": "^1.2.0",
+    "lint-staged": "^8.1.0",
+    "prettier": "^1.15.3",
+    "prop-types": "^15.6.2",
+    "react": "^16.6.3",
+    "rollup": "^0.67.4",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-peer-deps-external": "^2.2.0",
+    "wordcloud": "^1.1.0"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "lint": "eslint ."
+  }
+}

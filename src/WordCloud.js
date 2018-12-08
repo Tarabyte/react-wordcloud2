@@ -5,6 +5,10 @@ import WordCloudJS from 'wordcloud';
 class WordCloud extends PureComponent {
   static propTypes = {
     FallbackUI: PropTypes.element,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+
+    // WordCloudJS options
     list: PropTypes.arrayOf(
       (props, key, componentName, location, propFullName) => {
         const value = props[key];
@@ -26,11 +30,47 @@ class WordCloud extends PureComponent {
           );
         }
       }
-    )
+    ),
+
+    color: PropTypes.oneOfType([
+      PropTypes.string, // CSS color
+      PropTypes.object, // null to dissable color inlininig
+      PropTypes.func, // callback(word, weight, fontSize, distance, theta)
+    ]),
+
+    shape: PropTypes.oneOfType([
+      PropTypes.oneOf([
+        'circle',
+        'cardioid',
+        'diamond',
+        'square',
+        'triangle',
+        'triangle-forward',
+        'triangle-upright',
+        'pentagon',
+        'star',
+      ]),
+      PropTypes.func, // callback(theta) any polar coordinate equation
+    ]),
+
+    ellipticity: PropTypes.number,
+
+    minSize: PropTypes.number,
+
+    // calculates initial font size
+    weightFactor: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.func, // callback(weight)
+    ]),
+
+    // Dimension
+    gridSize: PropTypes.number,
+    origin: PropTypes.arrayOf(PropTypes.number),
+    drawOutOfBound: PropTypes.bool,
   };
 
   static defaultProps = {
-    FallbackUI: <div>Browser is not supported</div>
+    FallbackUI: <div>Browser is not supported</div>,
   };
 
   canvas = createRef();
@@ -44,7 +84,7 @@ class WordCloud extends PureComponent {
   }
 
   getOptions() {
-    const { FallbackUI, ...options } = this.props;
+    const { FallbackUI, width, height, ...options } = this.props;
 
     return options;
   }
@@ -57,7 +97,8 @@ class WordCloud extends PureComponent {
 
   render() {
     if (WordCloudJS.isSupported) {
-      return <canvas ref={this.canvas} />;
+      const { width, height } = this.props;
+      return <canvas ref={this.canvas} width={width} height={height} />;
     }
 
     return this.props.FallbackUI;

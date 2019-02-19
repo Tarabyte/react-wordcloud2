@@ -7,6 +7,7 @@ class WordCloud extends PureComponent {
     FallbackUI: PropTypes.element,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    component: PropTypes.string,
 
     // WordCloudJS options
     list: PropTypes.arrayOf(
@@ -67,26 +68,86 @@ class WordCloud extends PureComponent {
     gridSize: PropTypes.number,
     origin: PropTypes.arrayOf(PropTypes.number),
     drawOutOfBound: PropTypes.bool,
+
+    // callbacks
+    onStart: PropTypes.func,
+    onWordDrawn: PropTypes.func,
+    onStop: PropTypes.func,
   };
 
   static defaultProps = {
     FallbackUI: <div>Browser is not supported</div>,
+    component: 'canvas',
   };
 
   canvas = createRef();
 
+  _unbind = [];
+
   componentDidMount() {
+    // first bind listeners
+    this.bindEventListeners();
+    // only then draw
     this.renderWordCloud();
   }
 
   componentDidUpdate() {
+    // rebind listeners
+    this.unbindEventListeners();
+    this.bindEventListeners();
+    // redraw
     this.renderWordCloud();
   }
 
+  componentWillUnmount() {
+    this.unbindEventListeners();
+  }
+
   getOptions() {
-    const { FallbackUI, width, height, ...options } = this.props;
+    const {
+      FallbackUI,
+      width,
+      height,
+      onStart,
+      onWordDrawn,
+      onStop,
+      ...options
+    } = this.props;
 
     return options;
+  }
+
+  bindEventListeners() {
+    const { onWordDrawn, onStart, onStop } = this.props;
+    const { current: canvas } = this.canvas;
+
+    // too early
+    if (!canvas) return;
+
+    // bind all handlers
+    [
+      ['wordcloudstart', onStart],
+      ['wordclouddrawn', onWordDrawn],
+      ['wordcloudstop', onStop],
+    ].forEach(([event, handler]) => {
+      if (!handler) return;
+
+      canvas.addEventListener(event, handler);
+
+      this._unbind.push(() => {
+        canvas.removeEventListener(event, handler);
+      });
+    });
+  }
+
+  unbindEventListeners() {
+    const { current } = this.canvas;
+
+    if (current) {
+      this._unbind.forEach(handler => handler());
+    }
+
+    this._unbind = [];
   }
 
   renderWordCloud() {
@@ -97,8 +158,15 @@ class WordCloud extends PureComponent {
 
   render() {
     if (WordCloudJS.isSupported) {
-      const { width, height } = this.props;
-      return <canvas ref={this.canvas} width={width} height={height} />;
+      const { width, height, component: Cmp } = this.props;
+      return (
+        <Cmp
+          ref={this.canvas}
+          style={{ width, height }}
+          width={width}
+          height={height}
+        />
+      );
     }
 
     return this.props.FallbackUI;

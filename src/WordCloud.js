@@ -5,8 +5,13 @@ import WordCloudJS from 'wordcloud';
 class WordCloud extends PureComponent {
   static propTypes = {
     FallbackUI: PropTypes.element,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
+    dimensions: PropTypes.oneOfType([
+      PropTypes.shape({
+        width: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired,
+      }).isRequired,
+      PropTypes.oneOf(['responsive']).isRequired,
+    ]).isRequired,
     component: PropTypes.string,
 
     // WordCloudJS options
@@ -80,11 +85,27 @@ class WordCloud extends PureComponent {
     component: 'canvas',
   };
 
+  state = {
+    responsiveHeight: null,
+    responsiveWidth: null,
+  };
+
   canvas = createRef();
 
   _unbind = [];
 
   componentDidMount() {
+    const { dimensions } = this.props;
+
+    if (dimensions === 'responsive') {
+      const height = this.divElement.clientHeight;
+      const width = this.divElement.clientWidth;
+      this.setState({
+        responsiveHeight: height,
+        responsiveWidth: width,
+      });
+    }
+
     // first bind listeners
     this.bindEventListeners();
     // only then draw
@@ -95,6 +116,7 @@ class WordCloud extends PureComponent {
     // rebind listeners
     this.unbindEventListeners();
     this.bindEventListeners();
+
     // redraw
     this.renderWordCloud();
   }
@@ -106,11 +128,10 @@ class WordCloud extends PureComponent {
   getOptions() {
     const {
       FallbackUI,
-      width,
-      height,
       onStart,
       onWordDrawn,
       onStop,
+      dimensions,
       ...options
     } = this.props;
 
@@ -151,21 +172,55 @@ class WordCloud extends PureComponent {
   }
 
   renderWordCloud() {
-    if (WordCloudJS.isSupported) {
-      WordCloudJS(this.canvas.current, this.getOptions());
+    const { dimensions } = this.props;
+    const { responsiveHeight } = this.state;
+
+    if (
+      WordCloudJS.isSupported &&
+      (typeof dimensions === 'object' || responsiveHeight !== null)
+    ) {
+      const options = this.getOptions();
+
+      WordCloudJS(this.canvas.current, options);
     }
   }
 
   render() {
     if (WordCloudJS.isSupported) {
-      const { width, height, component: Cmp } = this.props;
+      const { dimensions, component: Cmp } = this.props;
+      const { responsiveHeight, responsiveWidth } = this.state;
+      let cmpStyle = {};
+      let wordcloud;
+
+      if (typeof dimensions === 'object') {
+        cmpStyle = dimensions;
+      } else if (responsiveHeight !== null) {
+        cmpStyle = {
+          width: responsiveWidth,
+          height: responsiveHeight,
+        };
+      }
+
+      if (typeof dimensions === 'object' || responsiveHeight !== null) {
+        wordcloud = (
+          <Cmp
+            ref={this.canvas}
+            style={cmpStyle}
+            width={cmpStyle.width}
+            height={cmpStyle.height}
+          />
+        );
+      }
+
       return (
-        <Cmp
-          ref={this.canvas}
-          style={{ width, height }}
-          width={width}
-          height={height}
-        />
+        <div
+          ref={divElement => {
+            this.divElement = divElement;
+          }}
+          style={{ height: '100%', width: '100%' }}
+        >
+          {wordcloud}
+        </div>
       );
     }
 
